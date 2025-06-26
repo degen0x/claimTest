@@ -131,7 +131,6 @@ describe("claim", () => {
             dailyLimit: new BN(0), // 10 SOL | BN/null
             claimRequestsLimit: 0 // number/null
         }).rpc({commitment: "finalized"});
-
         let time = Math.trunc(Date.now() / 1000);
         let today = Math.trunc(time / 86400);
         let expectedClaimCount;
@@ -158,7 +157,7 @@ describe("claim", () => {
 
         const globalStateStructBefore = await program.account.globalState.fetch(globalState[0]);
         if (globalStateStructBefore.today < new BN(today)) {
-            expectedToday = today;
+            expectedToday = new BN(today);
             expectedTodayClaimedTotal = new BN(10000000);
         } else {
             expectedToday = globalStateStructBefore.today;
@@ -197,12 +196,12 @@ describe("claim", () => {
         assert.equal(userStatestructAfter.bump, userState[1], "incorrect bump");
         assert.equal(userStatestructAfter.isInitialized, true, "incorrect is init");
         assert.equal(userStatestructAfter.claimedTotal, total, "incorrect claimed total");
-        assert.ok(userStatestructAfter.today.eq(new BN(today)), "incorrect today");
+        assert.ok(userStatestructAfter.today.eq(new BN(today)), "incorrect user today");
         assert.equal(userStatestructAfter.todayClaimCount, expectedClaimCount, "incorrect today claimed count");
         assert.equal((lamportsBefore + 10000000 - 10000), lamportsAfter, "incorrect lamports balance");
 
         let globalStateStructAfter = await program.account.globalState.fetch(globalState[0]);
-        assert.ok(globalStateStructAfter.today.eq(expectedToday), "incorrect today");
+        assert.ok(globalStateStructAfter.today.eq(expectedToday), "incorrect global today");
         assert.ok(globalStateStructAfter.todayTotal.eq(expectedTodayClaimedTotal), "incorrect today total");
     })
 
